@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 def objective_function(W, sigma):
     """
@@ -87,3 +88,28 @@ def N_insert(sigma):
                 neighbour.insert(j, element)
                 N.append(neighbour)
     return N
+
+def local_search_insert_greedy(W, sigma):
+    start_timer = time.perf_counter()
+    best_sigma = sigma
+    best_f = objective_function(W, sigma)
+
+    n = len(sigma)
+
+    for i in range(n):
+        base = list(sigma)
+        element = base.pop(i)
+
+        for j in range(n):
+            if j != i:
+                neighbour = base.copy()
+                neighbour.insert(j, element)
+                f_neighbour = objective_function(W, neighbour)
+
+                if f_neighbour > best_f:
+                    best_f = f_neighbour
+                    best_sigma = neighbour
+
+    end_timer = time.perf_counter()
+    elapsed_time = end_timer - start_timer
+    return best_sigma, best_f, elapsed_time
