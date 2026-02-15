@@ -66,3 +66,24 @@ def load_matrix_from_file(filepath, dtype=int):
         data.append(row)
 
     return np.array(data, dtype=dtype)
+
+# def neighbour_insert(sigma, i, j):
+#     neighbour = list(sigma.copy())
+#     element = neighbour.pop(i)  # Remove the element at index i
+#     neighbour.insert(j, element)  # Insert it at index j
+#     return neighbour
+
+def N_insert(sigma):
+    N = []
+    n = len(sigma)
+
+    for i in range(n):
+        base = list(sigma)
+        element = base.pop(i)
+
+        for j in range(n):
+            if j != i:
+                neighbour = base.copy()
+                neighbour.insert(j, element)
+                N.append(neighbour)
+    return N
