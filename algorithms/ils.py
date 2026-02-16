@@ -2,6 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(".."))
 from functions import *
+import random
 
 def iterated_local_search(W, sigma, perturbation_strength=2, max_iters=1000):
     start_timer = time.perf_counter()
@@ -39,7 +40,8 @@ def iterated_local_search(W, sigma, perturbation_strength=2, max_iters=1000):
                             new_best_found = True
                         
         if not new_best_found:
-            stuck = True
+            # Perturbation
+            best_sigma = perturbated_insert(best_sigma, perturbation_strength)
 
         iters += 1
 
@@ -48,5 +50,17 @@ def iterated_local_search(W, sigma, perturbation_strength=2, max_iters=1000):
     print("Total iterations: " + str(iters))
     return best_sigma, best_f, elapsed_time
 
+def perturbated_insert(sigma, strength):
+    sigma = list(sigma)
+    n = len(sigma)
+
+    for _ in range(strength):
+        i = random.randrange(n)
+        j = random.randrange(n)
+        if i != j:
+            element = sigma.pop(i)
+            sigma.insert(j, element)
+
+    return sigma
 
 

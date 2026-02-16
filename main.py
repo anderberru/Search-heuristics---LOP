@@ -26,7 +26,16 @@ print("initial objective function value: " + str(f))
 # print("best objective function value: " + str(best_f))
 
 
-best_sigma, best_f, elapsed_time = local_search_insert_first_improvement(A, sigma, max_iters=1000)
-print(f"Local search (insert) completed in {elapsed_time:.4f} seconds.")
-print("best sigma: " + str(np.array(best_sigma)))
+# best_sigma, best_f, elapsed_time = local_search_insert_first_improvement(A, sigma, max_iters=1000)
+best_sigma, best_f, elapsed_time = iterated_local_search(A, sigma, perturbation_strength=2, max_iters=1000)
+print(f"Completed in {elapsed_time:.4f} seconds.")
+# print("best sigma: " + str(np.array(best_sigma)))
 print("best objective function value: " + str(best_f))
+from plyer import notification
+notification.notify(message='Execution Finished!')
+
+# ils result:
+# initial objective function value: 81074
+# Total iterations: 1000
+# Local search (insert) completed in 1055.0506 seconds.
+# best objective function value: 145228

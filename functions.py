@@ -95,8 +95,7 @@ def local_search_insert_bestFirst(W, sigma, max_iters=1000):
     best_f = objective_function(W, sigma)
     visited = set()
     iters = 0
-
-
+    
     n = len(sigma)
     stuck = False
     new_best_found = False
