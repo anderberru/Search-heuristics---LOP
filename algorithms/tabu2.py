@@ -78,7 +78,7 @@ def tabu_search_insert(
     if max_iters is None:
         max_iters = 100 * n
     if tenure is None:
-        tenure = int(0.3 * n)
+        tenure = int(0.1 * n)
 
     # Medium-term defaults
     if elite_size is None:

@@ -124,8 +124,10 @@ def tabu_search_insert_optim(
             iters_since_improve += 1
             if iters_since_improve >= no_improve_limit:
                 break
+        
+        print("Iterations: ", it, end="\r")
 
-    print("Iterations: ", it)
+    print()
 
     elapsed = time.perf_counter() - start
     return best_perm.tolist(), int(best_val), elapsed

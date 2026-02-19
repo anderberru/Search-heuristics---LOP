@@ -36,7 +36,7 @@ def tabu_search_insert(
     if max_iters is None:
         max_iters = 100*n
     if tenure is None:
-        tenure = int(0.3 * n)
+        tenure = int(0.1 * n)
 
     perm = np.asarray(start_perm, dtype=int).copy()
     curr = objective_function(W, perm)
