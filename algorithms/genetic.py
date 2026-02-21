@@ -17,21 +17,36 @@ def choose_parents(population, population_size, W, method="proportional"):
         parent2 = population[selected_indices[1]]
     return parent1, parent2
 
-def cross_parents(parent1, parent2, method="n_point_crossover", num_crossover_points=2):
+def cross_parents(parent1, parent2, method="order_crossover"):
     child1, child2 = [], []
-    if method == "n_point_crossover":
+    if method == "order_crossover":
         n = len(parent1)
-        crossover_points = sorted(np.random.choice(range(1, n), num_crossover_points, replace=False))
-        crossover_points = [0] + crossover_points + [n]
+        i, j = sorted(np.random.choice(n, 2, replace=False))
 
-        for i in range(len(crossover_points) - 1):
-            start, end = crossover_points[i], crossover_points[i + 1]
-            if i % 2 == 0:
-                child1.extend(parent1[start:end])
-                child2.extend(parent2[start:end])
-            else:
-                child1.extend(parent2[start:end])
-                child2.extend(parent1[start:end])
+        # initialize children with -1 to indicate unfilled positions
+        child1 = [-1] * n
+        child2 = [-1] * n
+
+        # Copy the segment from parent1 to child1 and from parent2 to child2
+        child1[i:j] = parent1[i:j]
+        child2[i:j] = parent2[i:j]
+
+        # fill the remaining positions in child1 with the order of parent2
+        remaining1 = [x for x in parent2 if x not in child1]
+        idx = 0
+        for k in range(n):
+            if child1[k] == -1:
+                child1[k] = remaining1[idx]
+                idx += 1
+
+        # fill the remaining positions in child2 with the order of parent1
+        remaining2 = [x for x in parent1 if x not in child2]
+        idx = 0
+        for k in range(n):
+            if child2[k] == -1:
+                child2[k] = remaining2[idx]
+                idx += 1
+
     return child1, child2
 
 def mutate_child(child, method="swap"):
@@ -54,7 +69,7 @@ def choose_new_population(population_prime, population_size, W, method="elitist"
     
 
 
-def genetic_algorithm(W, population0, generations=1000, parent_selection_method="proportional", crossover_method="n_point_crossover", num_crossover_points=2, mutation_method="swap", new_population_method="elitist"):
+def genetic_algorithm(W, population0, generations=1000, parent_selection_method="proportional", crossover_method="order_crossover", mutation_method="swap", new_population_method="elitist"):
     start_timer = time.perf_counter()
     k = 0
     n = len(population0)
@@ -68,7 +83,7 @@ def genetic_algorithm(W, population0, generations=1000, parent_selection_method=
             parent1, parent2 = choose_parents(pk, n, W, method=parent_selection_method)
 
             # cross parents
-            child1, child2 = cross_parents(parent1, parent2, method=crossover_method, num_crossover_points=num_crossover_points)
+            child1, child2 = cross_parents(parent1, parent2, method=crossover_method)
 
             # mutate new children
             child1_mutated = mutate_child(child1, method=mutation_method)
