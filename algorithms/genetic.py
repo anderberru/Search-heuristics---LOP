@@ -1,9 +1,10 @@
 import sys
 import os
+import random
 sys.path.append(os.path.abspath(".."))
 from functions import *
 
-def choose_parents(population, population_size, W, method="proportional"):
+def choose_parents(population, population_size, W, method="proportional", tournament_size=2):
     if method == "proportional":
         # selection function proportional to objective function values
         sum_f = sum(objective_function(W, ind) for ind in population)
@@ -15,6 +16,22 @@ def choose_parents(population, population_size, W, method="proportional"):
         selected_indices = np.random.choice(len(population), size=2, replace=False, p=probabilities)
         parent1 = population[selected_indices[0]]
         parent2 = population[selected_indices[1]]
+
+    if method == "tournament":
+        # tournament selection
+        tournament_indices = np.random.choice(len(population), size=tournament_size, replace=False)
+        tournament_individuals = [population[i] for i in tournament_indices]
+        tournament_f_values = [objective_function(W, ind) for ind in tournament_individuals]
+
+        # select the best individual from the tournament as parent1
+        parent1 = tournament_individuals[np.argmax(tournament_f_values)]
+
+        # repeat for parent2
+        tournament_indices = np.random.choice(len(population), size=tournament_size, replace=False)
+        tournament_individuals = [population[i] for i in tournament_indices]
+        tournament_f_values = [objective_function(W, ind) for ind in tournament_individuals]
+        parent2 = tournament_individuals[np.argmax(tournament_f_values)]
+
     return parent1, parent2
 
 def cross_parents(parent1, parent2, method="order_crossover"):
@@ -55,6 +72,13 @@ def mutate_child(child, method="swap"):
         n = len(mutated_child)
         i, j = np.random.choice(n, size=2, replace=False)
         mutated_child[i], mutated_child[j] = mutated_child[j], mutated_child[i]
+
+    if method == "insert":
+        n = len(mutated_child)
+        i, j = np.random.choice(n, size=2, replace=False)
+        gene = mutated_child.pop(i)
+        mutated_child.insert(j, gene)
+
     return mutated_child
 
 def choose_new_population(population_prime, population_size, W, method="elitist"):
@@ -64,12 +88,26 @@ def choose_new_population(population_prime, population_size, W, method="elitist"
         sorted_population = sorted(population_prime, key=lambda ind: objective_function(W, ind), reverse=True)
         # keep the best individuals that fit in the population size
         new_population = sorted_population[:population_size]
+
+    if method == "pure_gen_elite1":
+        # differentiate parents and offspring
+        parents = population_prime[:population_size]
+        offspring = population_prime[population_size:]
+
+        # best individual among the parents
+        elite_index = np.argmax([objective_function(W, ind) for ind in parents])
+        elite = parents[elite_index]
+
+        # new population: elite + random n-1 offspring until population size is reached
+        selected_offspring = random.sample(offspring, population_size - 1)
+        new_population = [elite] + selected_offspring
+
     return new_population
 
     
 
 
-def genetic_algorithm(W, population0, generations=1000, parent_selection_method="proportional", crossover_method="order_crossover", mutation_method="swap", new_population_method="elitist"):
+def genetic_algorithm(W, population0, generations=1000, parent_selection_method="proportional", tournament_size=2, crossover_method="order_crossover", mutation_method="swap", new_population_method="elitist"):
     start_timer = time.perf_counter()
     k = 0
     n = len(population0)
@@ -80,7 +118,7 @@ def genetic_algorithm(W, population0, generations=1000, parent_selection_method=
         k += 1
         for _ in range(n//2):
             # choose parents based on a criteria
-            parent1, parent2 = choose_parents(pk, n, W, method=parent_selection_method)
+            parent1, parent2 = choose_parents(pk, n, W, method=parent_selection_method, tournament_size=tournament_size)
 
             # cross parents
             child1, child2 = cross_parents(parent1, parent2, method=crossover_method)
