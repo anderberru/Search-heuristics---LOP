@@ -4,7 +4,8 @@ from algorithms.ils import *
 
 # A = load_matrix_from_file("instances/Cebe.lop.n10.1")
 # A = load_matrix_from_file("instances/Cebe.lop.n30.4")
-A = load_matrix_from_file("instances/N-r100a2")
+# A = load_matrix_from_file("instances/N-r100a2")
+A = load_matrix_from_file("instances/N-r250e0")
 # A = load_matrix_from_file("instances/mini")
 # print(A)
 # print(A.shape)

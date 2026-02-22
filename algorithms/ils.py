@@ -44,10 +44,10 @@ def iterated_local_search(W, sigma, perturbation_strength=2, max_iters=1000):
             best_sigma = perturbated_insert(best_sigma, perturbation_strength)
 
         iters += 1
+        print("Iterations: ", iters, end="\r")
 
     end_timer = time.perf_counter()
     elapsed_time = end_timer - start_timer
-    print("Total iterations: " + str(iters))
     return best_sigma, best_f, elapsed_time
 
 def perturbated_insert(sigma, strength):
