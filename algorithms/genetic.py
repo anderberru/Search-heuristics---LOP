@@ -1,8 +1,8 @@
 import sys
 import os
-import random
 sys.path.append(os.path.abspath(".."))
 from functions import *
+import random
 
 def choose_parents(population, population_size, W, method="proportional", tournament_size=2):
     if method == "proportional":
@@ -107,9 +107,14 @@ def choose_new_population(population_prime, population_size, W, method="elitist"
     
 
 
-def genetic_algorithm(W, population0, generations=1000, parent_selection_method="proportional", tournament_size=2, crossover_method="order_crossover", mutation_method="swap", new_population_method="elitist"):
+def genetic_algorithm(W, population0=None, generations=1000, parent_selection_method="proportional", tournament_size=2, crossover_method="order_crossover", mutation_method="swap", new_population_method="elitist", population_size=10, seed=0):
     start_timer = time.perf_counter()
     k = 0
+    rng = np.random.default_rng(seed)
+
+    # Parameters
+    if population0 is None:
+        population0 = [rng.permutation(W.shape[0]) for _ in range(population_size)]
     n = len(population0)
     pk = population0.copy()
 

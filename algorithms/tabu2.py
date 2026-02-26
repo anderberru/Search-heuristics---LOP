@@ -52,8 +52,10 @@ def tabu_search_insert(
     W,
     start_perm=None,
     max_iters=None,
-    tenure=None,
     seed=0,
+
+    # Short-term memory
+    tenure=None,
 
     # NEW: choose memory modes
     medium_term=False,          # if True, uses elite-set intensification
@@ -72,39 +74,40 @@ def tabu_search_insert(
     n = W.shape[0]
     rng = np.random.default_rng(seed)
 
-    # Basic parameters
+    # Parameters
     if start_perm is None:
         start_perm = rng.permutation(n)
     if max_iters is None:
         max_iters = 100 * n
+
+    # Short-term memory params
     if tenure is None:
         tenure = int(0.1 * n)
 
-    # Medium-term defaults
+    # Medium-term memory params
     if elite_size is None:
         elite_size = max(5, n // 10)  # simple default
     if intensify_after is None:
         intensify_after = 20 * n      # stagnation threshold
 
-    # Long-term defaults
+    # Long-term memory params
     if long_lambda is None:
-        # Small, instance-scaled penalty (keeps it from dominating the objective)
-        long_lambda = 0.01 * float(np.mean(np.abs(W)))
+        long_lambda = 0.01 * float(np.mean(np.abs(W))) # Has to be small
 
     perm = np.asarray(start_perm, dtype=int).copy()
     curr = objective_function(W, perm)
     best_perm, best_val = perm.copy(), curr
 
-    # Short-term tabu list: (element, new_pos) -> expire_iter
+    # Tabu list (short-term). Forbids recently used move attributes (element, pos)
     tabu = {}
 
-    # Medium-term: store elite solutions
+    # Elite list (medium-term). Stores best solutions: val, perm
     elite = []
     if medium_term:
         _update_elite(elite, perm, curr, elite_size)
 
-    # Long-term: frequency of move attributes (x, j)
-    freq = np.zeros((n, n), dtype=np.int32) if long_term else None
+    # Frequency list (long-term). Saves the frequency of making the same move (element, pos)
+    freq = {}
 
     no_improve = 0
 
@@ -113,6 +116,7 @@ def tabu_search_insert(
         best_score = -10**18   # score used for choosing the move (may include penalty)
         best_cand_val = -10**18  # true objective value (no penalties)
 
+        # Explore neighbours
         for i in range(n):
             x = int(perm[i])
             for j in range(n):
@@ -130,20 +134,20 @@ def tabu_search_insert(
                     continue
 
                 # Long-term diversification: penalize frequently used move attributes
-                if long_term:
-                    score = cand_val - long_lambda * freq[x, j]
+                if long_term and (x, j) in freq:
+                    score = cand_val - long_lambda * freq[(x, j)]
                 else:
                     score = cand_val
 
                 if score > best_score:
                     best_score = score
                     best_cand_val = cand_val
-                    best_move = (i, j, x, cand_perm)
+                    best_move = (x, j, cand_perm)
 
         if best_move is None:
             break
 
-        i, j, x, perm = best_move
+        x, j, perm = best_move
         curr = best_cand_val
 
         # Update short-term tabu
@@ -151,7 +155,8 @@ def tabu_search_insert(
 
         # Update long-term frequency memory
         if long_term:
-            freq[x, j] += 1
+            if (x, j) not in freq: freq[(x, j)] = 0
+            freq[(x, j)] += 1
 
         # Update best and elite
         if curr > best_val:
@@ -164,13 +169,15 @@ def tabu_search_insert(
         if medium_term:
             _update_elite(elite, perm, curr, elite_size)
 
-        # Medium-term intensification trigger: restart from elite consensus
-        if medium_term and no_improve >= intensify_after:
-            perm = _elite_consensus_perm(elite, n, best_perm)
-            curr = objective_function(W, perm)
-            tabu.clear()          # common choice after restart
-            no_improve = 0
+            # Medium-term intensification trigger: restart from elite consensus
+            if no_improve >= intensify_after:
+                perm = _elite_consensus_perm(elite, n, best_perm)
+                curr = objective_function(W, perm)
+                tabu.clear() # not needed
+                no_improve = 0
 
-    print("Iterations: ", it)
+        print("Iterations: ", it, end="\r")
+
+    print()
     elapsed = time.perf_counter() - start
     return best_perm, best_val, elapsed

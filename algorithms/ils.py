@@ -2,18 +2,22 @@ import sys
 import os
 sys.path.append(os.path.abspath(".."))
 from functions import *
-import random
 
-def iterated_local_search(W, sigma, perturbation_strength=2, max_iters=1000):
+def iterated_local_search(W, sigma=None, perturbation_strength=2, max_iters=1000, seed=0):
     start_timer = time.perf_counter()
+    n = W.shape[0]
+    rng = np.random.default_rng(seed)
+
+    # Parameters
+    if sigma is None:
+        sigma = rng.permutation(n)
+
     best_sigma = sigma
     best_f = objective_function(W, sigma)
     visited = set()
-
-    n = len(sigma)
+    
     stuck = False
     new_best_found = False
-    n = len(sigma)
     iters = 0
 
     while not stuck and iters < max_iters:
@@ -55,8 +59,8 @@ def perturbated_insert(sigma, strength):
     n = len(sigma)
 
     for _ in range(strength):
-        i = random.randrange(n)
-        j = random.randrange(n)
+        i = np.random.randint(n)
+        j = np.random.randint(n)
         if i != j:
             element = sigma.pop(i)
             sigma.insert(j, element)

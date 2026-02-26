@@ -1,0 +1,12 @@
+==========================================================================================
+Instancia: instances/Cebe.lop.n10.1 (n=10)
+------------------------------------------------------------------------------------------
+Algoritmo Prueba                          f_ini       f_best        delta  tiempo(s)   ok
+------------------------------------------------------------------------------------------
+ILS      ils_suave                           -         2383            -     0.4782 True
+ILS      ils_fuerte                          -         2379            -     0.4856 True
+TABU     tabu_basico                         -         2360            -     0.4770 True
+TABU     tabu_memorias                       -         2360            -     0.4806 True
+GA       ga_tournament_insert                -         2365            -     0.2450 True
+GA       ga_proportional_swap                -         2363            -     0.6470 True
+GA       ga_best                             -         2383            -     0.5795 True

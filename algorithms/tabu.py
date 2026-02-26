@@ -75,7 +75,8 @@ def tabu_search_insert(
             best_val = curr
             best_perm = perm.copy()
 
-    print("Iterations: ", it)
+        print("Iterations: ", it, end="\r")
 
+    print()
     elapsed = time.perf_counter() - start
     return best_perm, best_val, elapsed

@@ -176,7 +176,9 @@ def tabu_search_insert_optim2(
             if no_improve >= max_no_improve:
                 break
 
-    print("Iterations: ", it)
+        print("Iterations: ", it, end="\r")
+
+    print()
 
     elapsed = time.perf_counter() - start
     return best_sigma.tolist(), int(best_f), elapsed
