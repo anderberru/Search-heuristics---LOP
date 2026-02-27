@@ -105,26 +105,33 @@ def print_best_config_per_instance(rows):
     for r in rows:
         by_instance_cfg[(r["instance"], r["alg"], r["test"])].append(r)
 
-    best_per_instance = {}
+    best_per_instance = defaultdict(list)
     for (instance, alg, test), items in by_instance_cfg.items():
         score = mean(x["best_f"] for x in items)
-        current = best_per_instance.get(instance)
-        if current is None or score > current["score"]:
-            best_per_instance[instance] = {
+        best_per_instance[instance].append(
+            {
                 "alg": alg,
                 "test": test,
                 "score": score,
                 "avg_delta": mean(x["delta"] for x in items),
                 "avg_time": mean(x["time"] for x in items),
             }
+        )
 
     print("=== BEST CONFIG PER INSTANCE ===")
-    print(f"{'instance':<20} {'alg':<8} {'test':<24} {'avg_best_f':>12} {'avg_delta':>12} {'avg_time(s)':>12}")
+    print(
+        f"{'instance':<20} {'alg':<8} {'test':<24} {'avg_best_f':>12} "
+        f"{'avg_delta':>12} {'avg_time(s)':>12} {'tie':>8}"
+    )
     for instance in sorted(best_per_instance):
-        v = best_per_instance[instance]
+        options = best_per_instance[instance]
+        max_score = max(x["score"] for x in options)
+        winners = [x for x in options if x["score"] == max_score]
+        tie = len(winners) > 1
+        v = winners[0]
         print(
             f"{instance:<20} {v['alg']:<8} {v['test']:<24} "
-            f"{v['score']:>12.3f} {v['avg_delta']:>12.3f} {v['avg_time']:>12.6f}"
+            f"{v['score']:>12.3f} {v['avg_delta']:>12.3f} {v['avg_time']:>12.6f} {str(tie):>8}"
         )
     print()
 
@@ -134,12 +141,11 @@ def print_best_config_per_size(rows):
     for r in rows:
         by_size_cfg[(r["n"], r["alg"], r["test"])].append(r)
 
-    best_per_size = {}
+    best_per_size = defaultdict(list)
     for (n, alg, test), items in by_size_cfg.items():
         score = mean(x["best_f"] for x in items)
-        current = best_per_size.get(n)
-        if current is None or score > current["score"]:
-            best_per_size[n] = {
+        best_per_size[n].append(
+            {
                 "alg": alg,
                 "test": test,
                 "score": score,
@@ -147,14 +153,21 @@ def print_best_config_per_size(rows):
                 "avg_time": mean(x["time"] for x in items),
                 "runs": len(items),
             }
-
+        )
     print("=== BEST CONFIG PER MATRIX SIZE (n) ===")
-    print(f"{'n':>4} {'alg':<8} {'test':<24} {'runs':>5} {'avg_best_f':>12} {'avg_delta':>12} {'avg_time(s)':>12}")
+    print(
+        f"{'n':>4} {'alg':<8} {'test':<24} {'runs':>5} "
+        f"{'avg_best_f':>12} {'avg_delta':>12} {'avg_time(s)':>12} {'tie':>8}"
+    )
     for n in sorted(best_per_size):
-        v = best_per_size[n]
+        options = best_per_size[n]
+        max_score = max(x["score"] for x in options)
+        winners = [x for x in options if x["score"] == max_score]
+        tie = len(winners) > 1
+        v = winners[0]
         print(
             f"{n:>4} {v['alg']:<8} {v['test']:<24} {v['runs']:>5} "
-            f"{v['score']:>12.3f} {v['avg_delta']:>12.3f} {v['avg_time']:>12.6f}"
+            f"{v['score']:>12.3f} {v['avg_delta']:>12.3f} {v['avg_time']:>12.6f} {str(tie):>8}"
         )
     print()
 
