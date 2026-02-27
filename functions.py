@@ -106,8 +106,9 @@ def local_search_insert_bestFirst(W, sigma, max_iters=1000):
         # print(f"Iteration {iters}, best_f: {best_f}")
         visited = set()
         new_best_found = False
+        reference_sigma = best_sigma.copy()
         for i in range(n):
-            base = list(best_sigma)
+            base = list(reference_sigma)
             element = base.pop(i)
 
             for j in range(n):

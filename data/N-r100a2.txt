@@ -1,0 +1,14 @@
+====================================================================================================
+Instancia: instances/N-r100a2 (n=100)
+----------------------------------------------------------------------------------------------------
+Algoritmo Prueba                          f_ini       f_best        delta  tiempo(s)   valid_perm
+----------------------------------------------------------------------------------------------------
+ILS      ils_suave                       77369       145217        67848    85.5344       True
+ILS      ils_fuerte                      77369       145217        67848    82.2777       True
+ILS      ils_fuerte_grande               77369       145217        67848   100.3605       True
+TABU     tabu_basico                     77369       144409        67040    85.4267       True
+TABU     tabu_memorias                   77369       144409        67040    78.1684       True
+TABU     tabu_memorias_grande            77369       144409        67040    70.6462       True
+GA       ga_tournament_insert            88799       129818        41019     1.6145       True
+GA       ga_proportional_swap            88799       108256        19457     4.3795       True
+GA       ga_best                         88799       131794        42995     1.3298       True

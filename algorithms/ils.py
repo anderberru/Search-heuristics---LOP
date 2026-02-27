@@ -12,8 +12,10 @@ def iterated_local_search(W, sigma=None, perturbation_strength=2, max_iters=1000
     if sigma is None:
         sigma = rng.permutation(n)
 
-    best_sigma = sigma
-    best_f = objective_function(W, sigma)
+    best_sigma = sigma.copy()
+    current_sigma = sigma
+    current_f = objective_function(W, sigma)
+    best_f = current_f
     visited = set()
     
     stuck = False
@@ -24,8 +26,9 @@ def iterated_local_search(W, sigma=None, perturbation_strength=2, max_iters=1000
         # N_instert
         visited = set()
         new_best_found = False
+        reference_sigma = current_sigma.copy()
         for i in range(n):
-            base = list(best_sigma)
+            base = list(reference_sigma)
             element = base.pop(i)
 
             for j in range(n):
@@ -35,17 +38,21 @@ def iterated_local_search(W, sigma=None, perturbation_strength=2, max_iters=1000
                     
                     if tuple(neighbour) not in visited:
                         visited.add(tuple(neighbour))  # Mark this neighbour as visited
-                        # compare objective function value of neighbour with best_f
+                        # compare objective function value of neighbour with current_f
                         f_neighbour = objective_function(W, neighbour)
 
-                        if f_neighbour > best_f:
-                            best_f = f_neighbour
-                            best_sigma = neighbour
+                        if f_neighbour > current_f:
+                            current_f = f_neighbour
+                            current_sigma = neighbour
                             new_best_found = True
                         
         if not new_best_found:
             # Perturbation
-            best_sigma = perturbated_insert(best_sigma, perturbation_strength)
+            if current_f > best_f:
+                best_f = current_f
+                best_sigma = current_sigma.copy()
+            current_sigma = perturbated_insert(current_sigma, perturbation_strength)
+
 
         iters += 1
         # print("Iterations: ", iters, end="\r")

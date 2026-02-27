@@ -144,8 +144,8 @@ def is_valid_permutation(perm):
 
 lop_instances = ["Cebe.lop.n10.1", 
                  "Cebe.lop.n30.4", 
-                #  "N-r100a2", 
-                #  "N-r250e0", 
+                 "N-r100a2", 
+                 "N-r250e0", 
                 ]
 
 seed = 0
@@ -165,11 +165,14 @@ for instance in lop_instances:
             params = test["params"]
             if alg == "ILS":
                 best_sigma, best_f, elapsed_time = iterated_local_search(W, sigma=sigma0, **params)
+                print(f"ILS test '{test['name']}' completed in {elapsed_time:.4f} seconds.")
             elif alg == "TABU":
                 best_sigma, best_f, elapsed_time = tabu_search_insert(W, start_perm=sigma0, **params)
+                print(f"Tabu Search test '{test['name']}' completed in {elapsed_time:.4f} seconds.")
             elif alg == "GA":
                 initial_f = max(objective_function(W, ind) for ind in population0)
                 best_sigma, best_f, elapsed_time = genetic_algorithm(W, population0=population0, **params)
+                print(f"Genetic Algorithm test '{test['name']}' completed in {elapsed_time:.4f} seconds.")
 
             delta = best_f - initial_f
             valid_perm = is_valid_permutation(best_sigma)
@@ -185,5 +188,8 @@ for instance in lop_instances:
             })
 
     output_path = write_results_file(instance_path, n, results)
-    print(f"Results for {instance_path} written to {output_path}")
+    print(f"Results for {instance_path} written to {output_path}\n")
+
+    from plyer import notification
+    notification.notify(message='Execution Finished!')
 
