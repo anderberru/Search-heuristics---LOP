@@ -3,12 +3,12 @@ Instancia: instances/Cebe.lop.n10.1 (n=10)
 ----------------------------------------------------------------------------------------------------
 Algoritmo Prueba                          f_ini       f_best        delta  tiempo(s)   valid_perm
 ----------------------------------------------------------------------------------------------------
-ILS      ils_suave                        2096         2383          287     0.2608       True
-ILS      ils_fuerte                       2096         2360          264     0.2373       True
-ILS      ils_fuerte_grande                2096         2360          264     0.2025       True
-TABU     tabu_basico                      2096         2360          264     0.1886       True
-TABU     tabu_memorias                    2096         2360          264     0.1922       True
-TABU     tabu_memorias_grande             2096         2383          287     0.2206       True
-GA       ga_tournament_insert             2183         2383          200     0.4297       True
-GA       ga_proportional_swap             2183         2348          165     1.2401       True
-GA       ga_best                          2183         2383          200     0.3462       True
+ILS      ils_suave                        2096         2383          287     0.0996       True
+ILS      ils_fuerte                       2096         2384          288     0.0756       True
+ILS      ils_fuerte_grande                2096         2384          288     0.0671       True
+TABU     tabu_basico                      2096         2360          264     0.2116       True
+TABU     tabu_memorias                    2096         2360          264     0.2207       True
+TABU     tabu_memorias_grande             2096         2383          287     0.1895       True
+GA       ga_tournament_insert             1937         2384          447     0.5011       True
+GA       ga_proportional_swap             1937         2353          416     1.0912       True
+GA       ga_best                          1937         2383          446     0.2960       True

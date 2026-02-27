@@ -50,8 +50,6 @@ def iterated_local_search(W, sigma=None, perturbation_strength=2, max_iters=1000
                                 best_f = current_f
                                 best_sigma = current_sigma.copy()
                             
-            if new_best_found:
-                break
                         
         if not new_best_found:
             # Perturbation
