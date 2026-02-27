@@ -12,21 +12,21 @@ TEST_BATTERIES_BY_ALGORITHM = {
         {
             "name": "ils_suave",
             "params": {
-                "perturbation_strength": 1,
+                "perturbation_strength": 2,
                 "max_iters": 100,
             },
         },
         {
             "name": "ils_fuerte",
             "params": {
-                "perturbation_strength": 2,
+                "perturbation_strength": 8,
                 "max_iters": 100,
             },
         },
         {
             "name": "ils_fuerte_grande",
             "params": {
-                "perturbation_strength": 10,
+                "perturbation_strength": 40,
                 "max_iters": 100,
             },
         },
