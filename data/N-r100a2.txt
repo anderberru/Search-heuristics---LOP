@@ -3,12 +3,12 @@ Instancia: instances/N-r100a2 (n=100)
 ----------------------------------------------------------------------------------------------------
 Algoritmo Prueba                          f_ini       f_best        delta  tiempo(s)   valid_perm
 ----------------------------------------------------------------------------------------------------
-ILS      ils_suave                       77369        77369            0    84.9122       True
-ILS      ils_fuerte                      77369        77369            0    85.1931       True
-ILS      ils_fuerte_grande               77369        77369            0    94.6716       True
-TABU     tabu_basico                     77369       144409        67040    78.7633       True
-TABU     tabu_memorias                   77369       144409        67040    70.5231       True
-TABU     tabu_memorias_grande            77369       144409        67040    70.3216       True
-GA       ga_tournament_insert            95050       132477        37427     1.5650       True
-GA       ga_proportional_swap            95050       106084        11034     4.3390       True
-GA       ga_best                         95050       134080        39030     1.4112       True
+ILS      ils_suave                       77369       144409        67040    60.0163       True
+ILS      ils_fuerte                      77369       144409        67040    60.4857       True
+ILS      ils_fuerte_grande               77369       144409        67040    60.1786       True
+TABU     tabu_basico                     77369       144409        67040    51.7623       True
+TABU     tabu_memorias                   77369       144409        67040    54.0678       True
+TABU     tabu_memorias_grande            77369       144409        67040    53.4384       True
+GA       ga_tournament_insert            97924       133032        35108     0.9988       True
+GA       ga_proportional_swap            97924       108103        10179     2.9217       True
+GA       ga_best                         97924       132373        34449     0.8918       True

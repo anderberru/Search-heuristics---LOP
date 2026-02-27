@@ -1,4 +1,5 @@
 import os
+import csv
 
 from functions import *
 from algorithms.ils import iterated_local_search
@@ -103,37 +104,24 @@ TEST_BATTERIES_BY_ALGORITHM = {
     ],
 }
 
-def format_results_text(instance_name, n, results):
-    def fmt_value(v):
-        return "-" if v is None else str(v)
-
-    lines = []
-    lines.append("=" * 100)
-    lines.append(f"Instancia: {instance_name} (n={n})")
-    lines.append("-" * 100)
-    lines.append(f"{'Algoritmo':<8} {'Prueba':<24} {'f_ini':>12} {'f_best':>12} {'delta':>12} {'tiempo(s)':>10} {'valid_perm':>12}")
-    lines.append("-" * 100)
-    for r in results:
-        lines.append(
-            f"{r['alg']:<8} "
-            f"{r['test']:<24} "
-            f"{fmt_value(r['initial_f']):>12} "
-            f"{r['best_f']:>12} "
-            f"{fmt_value(r['delta']):>12} "
-            f"{r['time']:>10.4f} "
-            f"{str(r['valid_perm']):>10}"
-        )
-    return "\n".join(lines) + "\n"
+CSV_FIELDNAMES = ["instance", "run", "n", "alg", "test", "initial_f", "best_f", "delta", "time", "valid_perm"]
 
 
-def write_results_file(instance_path, n, results, output_dir="data"):
+def init_results_file(output_dir="data", filename="results_global.csv"):
     os.makedirs(output_dir, exist_ok=True)
-    instance_name = os.path.basename(instance_path)
-    output_path = os.path.join(output_dir, f"{instance_name}.txt")
-    report = format_results_text(instance_path, n, results)
+    output_path = os.path.join(output_dir, filename)
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(report)
+    with open(output_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
+        writer.writeheader()
+
+    return output_path
+
+
+def append_result(output_path, result_row):
+    with open(output_path, "a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
+        writer.writerow(result_row)
 
     return output_path
 
@@ -142,54 +130,63 @@ def is_valid_permutation(perm):
     return set(perm) == set(range(n))
 
 
-lop_instances = ["Cebe.lop.n10.1", 
-                 "Cebe.lop.n30.4", 
-                 "N-r100a2", 
-                 "N-r250e0", 
-                ]
+instances_dir = "instances"
+lop_instances = sorted(
+    name for name in os.listdir(instances_dir)
+    if os.path.isfile(os.path.join(instances_dir, name)) and not name.startswith(".")
+)
 
 seed = 0
-rng = np.random.default_rng(seed)
+RUNS_PER_CONFIG = 3
+output_path = init_results_file()
 
 for instance in lop_instances:
-    instance_path = f"instances/{instance}"
+    instance_path = os.path.join(instances_dir, instance)
     W = load_matrix_from_file(instance_path)
     n = W.shape[0]
-    sigma0 = rng.permutation(n)
-    initial_f = objective_function(W, sigma0)
-    population_size = 20
-    population0 = [np.random.permutation(n) for _ in range(population_size)]
-    results = []
     for alg, tests in TEST_BATTERIES_BY_ALGORITHM.items():
         for test in tests:
-            params = test["params"]
-            if alg == "ILS":
-                best_sigma, best_f, elapsed_time = iterated_local_search(W, sigma=sigma0, **params)
-                print(f"ILS test '{test['name']}' completed in {elapsed_time:.4f} seconds.")
-            elif alg == "TABU":
-                best_sigma, best_f, elapsed_time = tabu_search_insert(W, start_perm=sigma0, **params)
-                print(f"Tabu Search test '{test['name']}' completed in {elapsed_time:.4f} seconds.")
-            elif alg == "GA":
-                initial_f = max(objective_function(W, ind) for ind in population0)
-                best_sigma, best_f, elapsed_time = genetic_algorithm(W, population0=population0, **params)
-                print(f"Genetic Algorithm test '{test['name']}' completed in {elapsed_time:.4f} seconds.")
+            for run in range(1, RUNS_PER_CONFIG + 1):
+                cur_seed = seed + run - 1
+                rng = np.random.default_rng(cur_seed)
+                sigma0 = rng.permutation(n)
+                initial_f = objective_function(W, sigma0)
+                population_size = 20
+                population0 = [rng.permutation(n) for _ in range(population_size)]
+                params = test["params"]
 
-            delta = best_f - initial_f
-            valid_perm = is_valid_permutation(best_sigma)
+                if alg == "ILS":
+                    best_sigma, best_f, elapsed_time = iterated_local_search(W, sigma=sigma0, **params)
+                    print(f"ILS test '{test['name']}' run {run}/{RUNS_PER_CONFIG} completed in {elapsed_time:.4f} seconds.")
+                elif alg == "TABU":
+                    best_sigma, best_f, elapsed_time = tabu_search_insert(W, start_perm=sigma0, **params)
+                    print(f"Tabu Search test '{test['name']}' run {run}/{RUNS_PER_CONFIG} completed in {elapsed_time:.4f} seconds.")
+                elif alg == "GA":
+                    initial_f = max(objective_function(W, ind) for ind in population0)
+                    best_sigma, best_f, elapsed_time = genetic_algorithm(W, population0=population0, **params)
+                    print(f"Genetic Algorithm test '{test['name']}' run {run}/{RUNS_PER_CONFIG} completed in {elapsed_time:.4f} seconds.")
 
-            results.append({
-                "alg": alg,
-                "test": test["name"],
-                "initial_f": initial_f,
-                "best_f": best_f,
-                "delta": delta,
-                "time": elapsed_time,
-                "valid_perm": valid_perm,
-            })
+                delta = best_f - initial_f
+                valid_perm = is_valid_permutation(best_sigma)
 
-    output_path = write_results_file(instance_path, n, results)
-    print(f"Results for {instance_path} written to {output_path}\n")
+                result_row = {
+                    "instance": instance,
+                    "run": run,
+                    "n": n,
+                    "alg": alg,
+                    "test": test["name"],
+                    "initial_f": initial_f,
+                    "best_f": best_f,
+                    "delta": delta,
+                    "time": f"{elapsed_time:.6f}",
+                    "valid_perm": valid_perm,
+                }
+                append_result(output_path, result_row)
 
-    from plyer import notification
-    notification.notify(message='Execution Finished!')
+    print(f"Results for {instance_path} written incrementally to {output_path}.\n")
+
+print(f"Global results written to {output_path}\n")
+
+from plyer import notification
+notification.notify(message='Execution Finished!')
 
