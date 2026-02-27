@@ -176,8 +176,8 @@ def tabu_search_insert(
                 tabu.clear() # not needed
                 no_improve = 0
 
-        print("Iterations: ", it, end="\r")
+        # print("Iterations: ", it, end="\r")
 
-    print()
+    # print()
     elapsed = time.perf_counter() - start
     return best_perm, best_val, elapsed
