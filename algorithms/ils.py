@@ -42,16 +42,21 @@ def iterated_local_search(W, sigma=None, perturbation_strength=2, max_iters=1000
                         f_neighbour = objective_function(W, neighbour)
 
                         if f_neighbour > current_f:
+                            # print(f"New best found: {f_neighbour} (previous: {current_f}) at iteration {iters}", end="\r")
                             current_f = f_neighbour
                             current_sigma = neighbour
                             new_best_found = True
+                            if current_f > best_f:
+                                best_f = current_f
+                                best_sigma = current_sigma.copy()
+                            
+            if new_best_found:
+                break
                         
         if not new_best_found:
             # Perturbation
-            if current_f > best_f:
-                best_f = current_f
-                best_sigma = current_sigma.copy()
             current_sigma = perturbated_insert(current_sigma, perturbation_strength)
+            current_f = objective_function(W, current_sigma)
 
 
         iters += 1
