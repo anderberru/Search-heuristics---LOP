@@ -129,6 +129,36 @@ def print_best_config_per_instance(rows):
     print()
 
 
+def print_best_config_per_size(rows):
+    by_size_cfg = defaultdict(list)
+    for r in rows:
+        by_size_cfg[(r["n"], r["alg"], r["test"])].append(r)
+
+    best_per_size = {}
+    for (n, alg, test), items in by_size_cfg.items():
+        score = mean(x["best_f"] for x in items)
+        current = best_per_size.get(n)
+        if current is None or score > current["score"]:
+            best_per_size[n] = {
+                "alg": alg,
+                "test": test,
+                "score": score,
+                "avg_delta": mean(x["delta"] for x in items),
+                "avg_time": mean(x["time"] for x in items),
+                "runs": len(items),
+            }
+
+    print("=== BEST CONFIG PER MATRIX SIZE (n) ===")
+    print(f"{'n':>4} {'alg':<8} {'test':<24} {'runs':>5} {'avg_best_f':>12} {'avg_delta':>12} {'avg_time(s)':>12}")
+    for n in sorted(best_per_size):
+        v = best_per_size[n]
+        print(
+            f"{n:>4} {v['alg']:<8} {v['test']:<24} {v['runs']:>5} "
+            f"{v['score']:>12.3f} {v['avg_delta']:>12.3f} {v['avg_time']:>12.6f}"
+        )
+    print()
+
+
 def main():
     rows = load_rows(CSV_PATH)
     if not rows:
@@ -138,6 +168,7 @@ def main():
     print_global_summary(rows)
     print_config_ranking(rows)
     print_best_config_per_instance(rows)
+    print_best_config_per_size(rows)
 
 
 if __name__ == "__main__":
