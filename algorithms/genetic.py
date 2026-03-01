@@ -81,7 +81,7 @@ def mutate_child(child, method="swap"):
 
     return mutated_child
 
-def choose_new_population(population_prime, population_size, W, method="elitist"):
+def choose_new_population(population_prime, population_size, W, method="elitist", immigrant_rate=0.1):
     new_population = []
     if method == "elitist":
         # keep the best individuals from the current population
@@ -101,6 +101,27 @@ def choose_new_population(population_prime, population_size, W, method="elitist"
         # new population: elite + random n-1 offspring until population size is reached
         selected_offspring = random.sample(offspring, population_size - 1)
         new_population = [elite] + selected_offspring
+
+    if method == "elitist_with_immigrants":
+        sorted_population = sorted(
+            population_prime,
+            key=lambda ind: objective_function(W, ind),
+            reverse=True
+        )
+
+        # number of immigrants
+        n_immigrants = int(population_size * immigrant_rate)
+
+        # keep best individuals except immigrants
+        survivors = sorted_population[:population_size - n_immigrants]
+
+        # generate random permutations
+        immigrants = [
+            np.random.permutation(W.shape[0])
+            for _ in range(n_immigrants)
+        ]
+
+        new_population = survivors + immigrants
 
     return new_population
 
@@ -137,10 +158,12 @@ def genetic_algorithm(W, population0=None, generations=1000, parent_selection_me
 
         pk = choose_new_population(pk_prime, n, W, method=new_population_method)
 
+
     # take the best individual from the final population
     best_individual = max(pk, key=lambda ind: objective_function(W, ind))
     best_f = objective_function(W, best_individual)
-
+    #     print(f"Generation {k}: best objective function value = {best_f:.4f}", end="\r")
+    # print()
     end_timer = time.perf_counter()
     elapsed_time = end_timer - start_timer
     return best_individual, best_f, elapsed_time

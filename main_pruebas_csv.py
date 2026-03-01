@@ -80,10 +80,10 @@ TEST_BATTERIES_BY_ALGORITHM = {
             },
         },
         {
-            "name": "ga_proportional_swap",
+            "name": "ga_tournament_swap",
             "params": {
                 "generations": 100,
-                "parent_selection_method": "proportional",
+                "parent_selection_method": "tournament",
                 "tournament_size": 2,
                 "crossover_method": "order_crossover",
                 "mutation_method": "swap",
@@ -95,16 +95,16 @@ TEST_BATTERIES_BY_ALGORITHM = {
             "params": {
                 "generations": 100,
                 "parent_selection_method": "tournament",
-                "tournament_size": 3,
+                "tournament_size": 2,
                 "crossover_method": "order_crossover",
                 "mutation_method": "insert",
-                "new_population_method": "pure_gen_elite1",
+                "new_population_method": "elitist_with_immigrants",
             },
         },
     ],
 }
 
-CSV_FIELDNAMES = ["instance", "run", "n", "alg", "test", "initial_f", "best_f", "delta", "time", "valid_perm"]
+CSV_FIELDNAMES = ["instance", "run", "n", "alg", "test", "initial_f", "best_f", "delta", "delta_rel", "time", "valid_perm"]
 
 
 def init_results_file(output_dir="data", filename="results_global.csv"):
@@ -151,7 +151,7 @@ for instance in lop_instances:
                 rng = np.random.default_rng(cur_seed)
                 sigma0 = rng.permutation(n)
                 initial_f = objective_function(W, sigma0)
-                population_size = 20
+                population_size = 150
                 population0 = [rng.permutation(n) for _ in range(population_size)]
                 params = test["params"]
 
@@ -178,6 +178,7 @@ for instance in lop_instances:
                     "initial_f": initial_f,
                     "best_f": best_f,
                     "delta": delta,
+                    "delta_rel": (delta / abs(initial_f)) if initial_f != 0 else float('inf'),
                     "time": f"{elapsed_time:.6f}",
                     "valid_perm": valid_perm,
                 }
